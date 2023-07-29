@@ -5,14 +5,19 @@ import Footer from '../components/Footer';
 
 function Home() {
 
-  const [imagePreview, setImagePreview] = useState(null);
+  const [defaultImage] = useState('/not-found.jpg'); // Replace this with the path to your default image
+  const [imagePreview, setImagePreview] = useState(defaultImage);
+  const [showInstructions, setShowInstructions] = useState(false);
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setShowInstructions(true);
+  };
   const handleImageChange = (e) => {
     const file = e.target.files[0];
 
     if (!file) return;
 
-    // Resize the image before displaying (optional)
     ImageResizer.imageFileResizer(
       file,
       1000, // maxWidth (change this to the desired max width, e.g., 1000)
@@ -25,7 +30,7 @@ function Home() {
       },
       'base64' // outputType
     );
-    
+
   };
 
   const crops = [
@@ -41,26 +46,17 @@ function Home() {
     'Coffee',
   ];
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedCrop, setSelectedCrop] = useState('Select a Crop');
+  const [selectedCrop, setSelectedCrop] = useState(null);
 
   const handleCropChange = (crop) => {
     setSelectedCrop(crop);
-    closeDropdown();
-  };
-
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const closeDropdown = () => {
-    setIsOpen(false);
   };
 
   return (
     <div className='bg-slate-100 dark:bg-slate-900 w-full'>
+      <div className='fixed h-screen bg-cover top-0 w-screen bg-right left-0 bg-[url("https://tailwindcss.com/_next/static/media/1-dark@tinypng.a99d6c93.png")]' />
       <Navbar />
-      <div className='h-screen w-full bg-cover bg-center bg-[url("https://assets-global.website-files.com/5b26e3fda3234fe366aa392d/647d5adad3cfe3869aa1d955_partners-ty-bg.svg")] lg:grid lg:grid-cols-2 flex flex-col gap-6 p-10 justify-items-center place-items-center'>
+      <div className='h-screen w-full lg:grid lg:grid-cols-2 flex flex-col lg:mt-0 mt-16 gap-6 p-10 justify-items-center place-items-center'>
         <div>
           <h1 className='text-[clamp(32px,6vw,48px)] text-black dark:text-slate-200 font-[500] tracking-[-1.4px] leading-[115%]'>Discover AgriSenseAI:</h1>
           <h1 className='text-[clamp(24px,6vw,30px)] text-slate-700 dark:text-slate-200 font-[500] tracking-[-1.4px] leading-[115%]'>Transforming Agriculture with Cutting-Edge AI Solutions</h1>
@@ -70,85 +66,76 @@ function Home() {
 
       </div>
 
-      <div className='w-full p-3 sm:p-10 md:p-20 flex items-center justify-center'>
-        <div className='p-6 w-full bg-slate-300 dark:bg-slate-950 rounded-lg flex flex-col items-center'>
-          <h1 className='text-2xl font-semibold text-slate-800 dark:text-slate-100'>Upload the Image</h1>
-          <div className='flex min-h-[50vh] w-full gap-4'>
+      <div className='w-full p-3 sm:p-10 md:p-20 flex bg-transparent items-center justify-center'>
+        <div className='p-6 w-full bg-slate-300/50 dark:bg-slate-950/50 backdrop-blur rounded-lg flex flex-col items-center'>
+          <h1 className='text-3xl font-semibold text-slate-800 dark:text-slate-100'>Analyze your Crops</h1>
+          <div className='flex flex-col min-h-[60vh] w-full gap-4'>
 
             {/* Dropdown */}
 
-            <div className="relative inline-block text-left">
-              <div>
-                <span className="rounded-md shadow-sm">
+            <div className='my-10'>
+              <div className='text-slate-800 dark:text-slate-100 mb-5'>Select the type of crop you would like to Analyze</div>
+              <div className="flex w-full flex-wrap gap-2">
+                {crops.map((crop, index) => (
                   <button
-                    type="button"
-                    onClick={toggleDropdown}
-                    className="inline-flex justify-center w-44 px-4 py-2 text-sm font-medium text-gray-700 dark:bg-slate-700/80 dark:text-slate-200 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    id="dropdown-menu"
-                    aria-haspopup="true"
-                    aria-expanded={isOpen ? 'true' : 'false'}
+                    key={index}
+                    className={`px-4 py-2 text-sm font-medium ${selectedCrop === crop
+                      ? 'text-gray-700 dark:text-slate-200 bg-white dark:bg-slate-700/80 ring-purple-400 ring-2'
+                      : 'text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-800'
+                      } rounded-md hover:bg-gray-200 dark:hover:bg-slate-600/70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+                    onClick={() => handleCropChange(crop)}
                   >
-                    {selectedCrop}
-                    <svg
-                      className={`${isOpen ? 'transform rotate-180' : ''
-                        } -mr-1 ml-2 h-5 w-5`}
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    {crop}
                   </button>
-                </span>
+                ))}
               </div>
 
-              {isOpen && (
-                <div
-                  className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white/40 dark:bg-slate-600/40 backdrop-blur ring-1 ring-black ring-opacity-5"
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="dropdown-menu"
-                >
-                  <div className="py-1" role="none">
-                    {crops.map((crop, index) => (
-                      <button
-                        key={index}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-slate-200 hover:bg-purple-200/70 hover:text-gray-900"
-                        role="menuitem"
-                        onClick={() => handleCropChange(crop)}
-                      >
-                        {crop}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div className="mt-4">
+                {selectedCrop ? (
+                  <p className="text-gray-700 dark:text-slate-200">
+                    Upload Image for {selectedCrop}
+                  </p>
+                ) : (
+                  <p className="text-gray-700 dark:text-slate-200">Select a crop</p>
+                )}
+              </div>
             </div>
-            <div className="p-4 w-full">
-              {imagePreview && (
-                <div className="my-4">
-                  <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">Uploaded Image:</h3>
-                  <img src={imagePreview} alt="Uploaded" className="rounded object-cover w-full" />
+            <div className="relative flex w-full gap-6 overflow-x-hidden">
+              <div className="relative overflow-hidden w-full">
+                <div className={` duration-500 transition-[width] ${showInstructions ? "w-full md:w-1/2" : "w-full"}`}>
+                  <label className="inline-block w-min rounded mb-8">
+                    <input
+                      type="file"
+                      accept=".jpg, .jpeg, .png"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                    <span className="px-4 py-2 text-sm font-medium bg-purple-500 text-white rounded-l">
+                      Choose
+                    </span>
+                    <span className="px-4 py-2 w-fit whitespace-nowrap text-sm font-medium bg-slate-400 dark:bg-slate-600 text-white rounded-r">
+                      Upload Image
+                    </span>
+                  </label>
+                  {imagePreview && (
+                    <div className="my-4 w-full flex justify-center">
+                      <img src={imagePreview} alt="Uploaded" className="rounded object-contain aspect-[3/2] max-w-2xl w-full" />
+                    </div>
+                  )}
                 </div>
-              )}
-              <input
-                type="file"
-                accept=".jpg, .jpeg, .png"
-                onChange={handleImageChange}
-                className="border border-slate-500 rounded p-2"
-              />
+                <div className={`md:w-1/2 w-full h-full md:absolute md:top-0 md:right-0 transition-[transform,opacity] delay-100 duration-500 ${ showInstructions ? "translate-y-0 opacity-100" : "translate-y-[100%] opacity-0"}`}>
+                  <h1 className='text-2xl text-slate-800 dark:text-slate-100'>Instructions</h1>
+                </div>
+              </div>
 
             </div>
-
+            <div className='flex w-full py-4 justify-end'>
+              <button className='bg-purple-500 text-white py-1 px-4 rounded' disabled={imagePreview === defaultImage} onClick={handleSubmit} type='submit'>Upload</button>
+            </div>
           </div>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   )
 }
