@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar'
 import ImageResizer from 'react-image-file-resizer';
 import Footer from '../components/Footer';
+import { sendReqToServer } from '../hooks/useAxios';
+import { axios } from '../api';
 
 function Home() {
 
@@ -51,6 +53,25 @@ function Home() {
   const handleCropChange = (crop) => {
     setSelectedCrop(crop);
   };
+
+  const getInformation = async () => {
+    try{
+      const { request, response } = await sendReqToServer({
+        axiosInstance: axios,
+        url: "/check",
+        method: "GET",
+        requestConfig: {}
+      })
+
+      if(response){
+        console.log(response)
+      }
+    }catch{}
+  }
+
+  useEffect(()=>{
+    getInformation()
+  })
 
   return (
     <div className='bg-slate-100 dark:bg-slate-900 w-full'>
