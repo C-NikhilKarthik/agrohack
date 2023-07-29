@@ -1,12 +1,15 @@
 import os
-from flask import Flask, redirect, render_template, request
+from flask import Flask, redirect, render_template, request ,jsonify
 from PIL import Image
 import torchvision.transforms.functional as TF
 import CNN
 import numpy as np
 import torch
 import pandas as pd
+from flask_cors import CORS
 
+app = Flask(__name__)
+CORS(app)  # This will enable CORS for the entire app
 
 
 disease_info = pd.read_csv('disease_info.csv' , encoding='cp1252')
@@ -27,7 +30,6 @@ def prediction(image_path):
     return index
 
 
-app = Flask(__name__)
 
 # @app.route('/')
 # def home_page():
@@ -55,19 +57,33 @@ def submit():
         print(file_path)
         pred = prediction(file_path)
         title = disease_info['disease_name'][pred]
-        description =disease_info['description'][pred]
+        description = disease_info['description'][pred]
         prevent = disease_info['Possible Steps'][pred]
         image_url = disease_info['image_url'][pred]
         supplement_name = supplement_info['supplement name'][pred]
         supplement_image_url = supplement_info['supplement image'][pred]
         supplement_buy_link = supplement_info['buy link'][pred]
-        return render_template('submit.html' , title = title , desc = description , prevent = prevent , 
-                               image_url = image_url , pred = pred ,sname = supplement_name , simage = supplement_image_url , buy_link = supplement_buy_link)
+        
+        # Convert pred to a regular Python integer
+        pred = int(pred)
 
+        result = {
+            'title': title,
+            'desc': description,
+            'prevent': prevent,
+            'image_url': image_url,
+            'pred': pred,
+            'sname': supplement_name,
+            'simage': supplement_image_url,
+            'buy_link': supplement_buy_link
+        }
+        
+        return jsonify(result)
 # @app.route('/market', methods=['GET', 'POST'])
 # def market():
 #     return render_template('market.html', supplement_image = list(supplement_info['supplement image']),
 #                            supplement_name = list(supplement_info['supplement name']), disease = list(disease_info['disease_name']), buy = list(supplement_info['buy link']))
 
 if __name__ == '__main__':
+    app.run(host='localhost', port=5000)
     app.run(debug=True)
